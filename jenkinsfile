@@ -51,7 +51,7 @@ sshagent(['291919ca-9f84-48ee-a692-0d1237016360']) {
 }
 }
 catch (e) {
-currentBuild.result = 'FAILURE"
+currentBuild.result = 'FAILURE'
     } finally {
         notifySlack(currentBuild.result)
     }
