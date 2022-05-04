@@ -1,5 +1,27 @@
-node {
+def notifySlack(String buildStatus = 'STARTED') {
+    // Build status of null means success.
+    buildStatus = buildStatus ?: 'SUCCESS'
 
+    def color
+
+    if (buildStatus == 'STARTED') {
+        color = '#D4DADF'
+    } else if (buildStatus == 'SUCCESS') {
+        color = '#BDFFC3'
+    } else if (buildStatus == 'UNSTABLE') {
+        color = '#FFFE89'
+    } else {
+        color = '#FF9FA1'
+    }
+
+    def msg = "${buildStatus}: `${env.JOB_NAME}` #${env.BUILD_NUMBER}:\n${env.BUILD_URL}"
+
+    slackSend(color: color, message: msg)
+}
+
+node {
+	try{
+//For POLL SCM and Discard Old Builds
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '5', artifactNumToKeepStr: '5', daysToKeepStr: '10', numToKeepStr: '10')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
 
 def mavenHome = tool name: 'mvn 3.8.5'
@@ -11,20 +33,27 @@ git branch: 'development', url: 'https://github.com/Tamizhvanann/maven-web-appli
 stage ('build') {
 sh "${mavenHome}/bin/mvn clean package"
 }
-/*
 //Sonar Qube report Gen
 stage ('Sonar Report') {
 sh "${mavenHome}/bin/mvn sonar:sonar"
 }
+
 //Upload Artifacts in Repo
 stage ('Upload Artifacts') {
-sh "${mavenHome}/bin/mvn deploy"
+sh "${mavenHome}/bin/mvn delpoy"
 }
-//Upload Artifacts to Tomcat
+
+//Upload Artifacts in Repo
 stage ('Upload to Tomcat') {
 sshagent(['291919ca-9f84-48ee-a692-0d1237016360']) {
  sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.42.41:/opt/apache-tomcat-9.0.62/webapps"
 }
 }
-*/
+}
+catch(e){
+currentBuild.result = 'FAILURE"
+throw e
+    } finally {
+        notifySlack(currentBuild.result)
+    }
 }
