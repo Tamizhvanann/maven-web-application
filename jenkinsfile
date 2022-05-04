@@ -20,7 +20,7 @@ def notifySlack(String buildStatus = 'STARTED') {
 }
 
 node {
-	try{
+	try {
 //For POLL SCM and Discard Old Builds
 properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '5', artifactNumToKeepStr: '5', daysToKeepStr: '10', numToKeepStr: '10')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
 
@@ -49,7 +49,7 @@ sshagent(['291919ca-9f84-48ee-a692-0d1237016360']) {
  sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.42.41:/opt/apache-tomcat-9.0.62/webapps"
 }
 }
-catch(e){
+catch(e) {
 currentBuild.result = 'FAILURE"
     } finally {
         notifySlack(currentBuild.result)
