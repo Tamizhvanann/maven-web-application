@@ -40,7 +40,7 @@ sh "${mavenHome}/bin/mvn sonar:sonar"
 
 //Upload Artifacts in Repo
 stage ('Upload Artifacts') {
-sh "${mavenHome}/bin/mvn delpoy"
+sh "${mavenHome}/bin/mvn deploy"
 }
 
 //Upload Artifacts in Repo
