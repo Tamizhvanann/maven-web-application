@@ -1,0 +1,26 @@
+node {
+
+def mavenHome = tool name: 'mvn 3.8.5'
+//Get code from Github
+stage('checkout code') {
+git branch: 'development', url: 'https://github.com/Tamizhvanann/maven-web-application.git'
+}
+//Build the package
+stage ('build') {
+sh "${mavenHome}/bin/mvn clean package"
+}
+//Sonar Qube report Gen
+stage ('Sonar Report') {
+sh "${mavenHome}/bin/mvn sonar:sonar"
+}
+//Upload Artifacts in Repo
+stage ('Upload Artifacts') {
+sh "${mavenHome}/bin/mvn deploy"
+}
+//Upload Artifacts to Tomcat
+stage ('Upload to Tomcat') {
+sshagent(['291919ca-9f84-48ee-a692-0d1237016360']) {
+ sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@3.111.42.41:/opt/apache-tomcat-9.0.62/webapps"
+}
+}
+}
