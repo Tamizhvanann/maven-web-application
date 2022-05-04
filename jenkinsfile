@@ -1,5 +1,7 @@
 node {
 
+properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '5', artifactNumToKeepStr: '5', daysToKeepStr: '10', numToKeepStr: '10')), [$class: 'JobLocalConfiguration', changeReasonComment: ''], pipelineTriggers([pollSCM('* * * * *')])])
+
 def mavenHome = tool name: 'mvn 3.8.5'
 //Get code from Github
 stage('checkout code') {
